@@ -49,7 +49,7 @@ use script::dom::htmlimageelement::LayoutHTMLImageElementHelpers;
 use script::dom::htmlinputelement::{HTMLInputElement, LayoutHTMLInputElementHelpers};
 use script::dom::htmltextareaelement::{HTMLTextAreaElement, LayoutHTMLTextAreaElementHelpers};
 use script::dom::node::{HAS_CHANGED, HAS_DIRTY_DESCENDANTS, IS_DIRTY};
-use script::dom::node::{LayoutNodeHelpers, Node, SharedLayoutData};
+use script::dom::node::{IN_FRAGMENTATION_CONTAINER, LayoutNodeHelpers, Node, SharedLayoutData};
 use script::dom::text::Text;
 use script::layout_interface::TrustedNodeAddress;
 use selectors::matching::DeclarationBlock;
@@ -149,6 +149,10 @@ pub trait LayoutNode<'ln> : Sized + Copy + Clone {
             child.dirty_descendants();
         }
     }
+
+    fn in_fragmentation_container(&self) -> bool;
+
+    unsafe fn set_in_fragmentation_container(&self, value: bool);
 
     /// Borrows the layout data without checks.
     #[inline(always)]
@@ -395,6 +399,14 @@ impl<'ln> LayoutNode<'ln> for ServoLayoutNode<'ln> {
 
     unsafe fn set_dirty_descendants(&self, value: bool) {
         self.node.set_flag(HAS_DIRTY_DESCENDANTS, value)
+    }
+
+    fn in_fragmentation_container(&self) -> bool {
+        unsafe { self.node.get_flag(IN_FRAGMENTATION_CONTAINER) }
+    }
+
+    unsafe fn set_in_fragmentation_container(&self, value: bool) {
+        self.node.set_flag(IN_FRAGMENTATION_CONTAINER, value)
     }
 
     unsafe fn borrow_layout_data_unchecked(&self) -> *const Option<LayoutDataWrapper> {
@@ -952,6 +964,8 @@ pub trait ThreadSafeLayoutNode<'ln> : Clone + Copy + Sized {
         }
     }
 
+    fn in_fragmentation_container(&self) -> bool;
+
     /// If this is a text node, generated content, or a form element, copies out
     /// its content. Otherwise, panics.
     ///
@@ -1146,6 +1160,10 @@ impl<'ln> ThreadSafeLayoutNode<'ln> for ServoThreadSafeLayoutNode<'ln> {
                 Some(ref layout_data) => layout_data.data.flags,
             }
         }
+    }
+
+    fn in_fragmentation_container(&self) -> bool {
+        self.node.in_fragmentation_container()
     }
 
     fn text_content(&self) -> TextContent {
