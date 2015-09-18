@@ -180,6 +180,7 @@ pub struct SharedLayoutData {
 
 /// Encapsulates the abstract layout data.
 #[derive(HeapSizeOf)]
+#[repr(C)]  // Make transmute in layout_task.rs not rely on undefined repr(rust) struct layout
 pub struct LayoutData {
     _shared_data: SharedLayoutData,
     #[ignore_heap_size_of = "TODO(#6910) Box value that should be counted but the type lives in layout"]
