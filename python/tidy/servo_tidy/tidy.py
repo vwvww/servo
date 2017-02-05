@@ -548,6 +548,8 @@ def check_rust(file_name, lines):
             # This particular pattern is not reentrant-safe in script_thread.rs
             (r"match self.documents.borrow", "use a separate variable for the match expression",
              lambda match, line: file_name.endswith('script_thread.rs')),
+            # TODO: insert regex for case: 'use foo::bar::{ Something, SomethingElse };'
+            # The space after '{' and before '}' should be treated as tidy error.
         ]
 
         for pattern, message, filter_func in regex_rules:

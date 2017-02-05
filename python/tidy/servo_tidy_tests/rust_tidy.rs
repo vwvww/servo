@@ -5,6 +5,7 @@
 use    app_units::Au;
 use azure::azure_hl::{AntialiasMode, Color,
 ColorPattern, CompositionOp};
+use azure::azure_hl::{ AntialiasMode, Color, ColorPattern, CompositionOp };
 use euclid::size::Size2D;
 use azure::azure::AzIntSize;
 use azure::azure::{AzIntSize};
